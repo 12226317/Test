@@ -1,0 +1,1583 @@
+var SCA_BOH_MANAGEMENT_APP = window.SCA_BOH_MANAGEMENT_APP || {};
+
+(function () {
+  var MSG_PREFIX = "SCA_BOH_MANAGEMENT_APP: ";
+
+  // Set glb_var_recordId = current selected record GUID
+  SCA_BOH_MANAGEMENT_APP.glb_var_recordId = null;
+  // Set glb_var_userdetails = builds collection of current user details (email and displayname)
+  SCA_BOH_MANAGEMENT_APP.glb_var_userdetails = null;
+
+
+// ==================================================================================================================================================
+// -------------------------------------------- SCA_Requests - formOnLoad ---------======------------------------------------------------------------
+// ==================================================================================================================================================
+
+// Action: Retreive record and current user details, Call  SCA_BOH_MANAGEMENT_APP.form_requests_newrecord_onload function
+
+// Status: Confirmed and Tested
+
+  this.formOnLoad_Request = function (executionContext) {
+    console.log("FormOnLoad Started");
+    
+    // Get the form context
+    var formContext = executionContext.getFormContext();
+
+    // Set glb_var_recordId = current selected record GUID
+    SCA_BOH_MANAGEMENT_APP.glb_var_recordId = formContext.data.entity.getId().replace("{", "").replace("}", "");
+ 
+    // Set glb_var_userdetails = builds collection of current user details (email and displayname)
+    var userSettings = Xrm.Utility.getGlobalContext().userSettings;
+    var userGUID = userSettings.userId;
+
+    Xrm.WebApi.retrieveRecord("systemuser", userGUID, "?$select=internalemailaddress,fullname").then(
+      function success(userResult) {
+        SCA_BOH_MANAGEMENT_APP.glb_var_userdetails = userResult;
+
+        // Now, log the values after successful retrieval
+        console.log("Retrieved values: Name: " + SCA_BOH_MANAGEMENT_APP.glb_var_userdetails.internalemailaddress + ", Full Name: " + SCA_BOH_MANAGEMENT_APP.glb_var_userdetails.fullname);
+
+    // Call the functions here
+    SCA_BOH_MANAGEMENT_APP.form_requests_newrecord_onload(executionContext);
+
+    function error(error) {
+        console.error("Error retrieving user details: " + error.message);
+      }
+    ;
+  })};
+
+// ==================================================================================================================================================
+// -------------------------------------------- SCA_Submissions - formOnLoad ------------------------------------------------------------------------
+// ==================================================================================================================================================
+
+// Action: Retreive record and current user details, Call tab visablity functions and condition checks
+
+// Status: Confirmed and Tested
+
+  this.formOnLoad = function (executionContext) {
+    console.log("FormOnLoad Started");
+    
+    // Get the form context
+    var formContext = executionContext.getFormContext();
+
+    // Set glb_var_recordId = current selected record GUID
+    SCA_BOH_MANAGEMENT_APP.glb_var_recordId = formContext.data.entity.getId().replace("{", "").replace("}", "");
+ 
+    // Set glb_var_userdetails = builds collection of current user details (email and displayname)
+    var userSettings = Xrm.Utility.getGlobalContext().userSettings;
+    var userGUID = userSettings.userId;
+
+    Xrm.WebApi.retrieveRecord("systemuser", userGUID, "?$select=internalemailaddress,fullname").then(
+      function success(userResult) {
+        SCA_BOH_MANAGEMENT_APP.glb_var_userdetails = userResult;
+
+        // Now, log the values after successful retrieval
+        console.log("Retrieved values: Name: " + SCA_BOH_MANAGEMENT_APP.glb_var_userdetails.internalemailaddress + ", Full Name: " + SCA_BOH_MANAGEMENT_APP.glb_var_userdetails.fullname);
+
+        // Call the tab functions here
+        SCA_BOH_MANAGEMENT_APP.tab_Escalate(executionContext);
+        SCA_BOH_MANAGEMENT_APP.tab_Requests(executionContext);
+        SCA_BOH_MANAGEMENT_APP.tab_AmendSORs(executionContext);
+        SCA_BOH_MANAGEMENT_APP.tab_releaseforrem(executionContext);
+        SCA_BOH_MANAGEMENT_APP.tab_artefacts(executionContext);
+
+        // Call the condition functions here
+        SCA_BOH_MANAGEMENT_APP.warning_duplicaterecord(executionContext);
+
+        // Continue with the rest of your formOnLoad function
+        console.log(SCA_BOH_MANAGEMENT_APP.glb_var_recordId);
+        console.log(SCA_BOH_MANAGEMENT_APP.glb_var_userdetails.internalemailaddress);
+        console.log(SCA_BOH_MANAGEMENT_APP.glb_var_userdetails.fullname);
+        console.log("FormOnLoad Finished");
+      },
+      function error(error) {
+        console.error("Error retrieving user details: " + error.message);
+      }
+    );
+  };
+
+// ==================================================================================================================================================
+// -------------------------------------------- SCA_AssociatedTickets - onFormLoad ------------------------------------------------------------------
+// ==================================================================================================================================================
+
+// Action: onFormLoad action
+//         - Runs associatedtickets_tab_MIR function (Changes what tabs are visible on form)
+
+// Status: Confirmed and Tested
+
+this.associatedtickets_formOnLoad = function (executionContext) {
+  console.log("SCA Associated Tickets - MASTER Script formOnLoad = Started");
+  
+  // Get the form context
+  var formContext = executionContext.getFormContext();
+
+  // Set glb_var_recordId = current selected record GUID
+  SCA_BOH_MANAGEMENT_APP.glb_var_recordId = formContext.data.entity.getId().replace("{", "").replace("}", "");
+
+  // Set glb_var_userdetails = builds collection of current user details (email and displayname)
+  var userSettings = Xrm.Utility.getGlobalContext().userSettings;
+  var userGUID = userSettings.userId;
+
+  Xrm.WebApi.retrieveRecord("systemuser", userGUID, "?$select=internalemailaddress,fullname").then(
+    function success(userResult) {
+      SCA_BOH_MANAGEMENT_APP.glb_var_userdetails = userResult;
+
+      // Now, log the values after successful retrieval
+      console.log("Retrieved values: Name: " + SCA_BOH_MANAGEMENT_APP.glb_var_userdetails.internalemailaddress + ", Full Name: " + SCA_BOH_MANAGEMENT_APP.glb_var_userdetails.fullname);
+
+      // Call the tab functions here
+      SCA_BOH_MANAGEMENT_APP.associatedtickets_tab_MIR(executionContext);
+
+      // Continue with the rest of your formOnLoad function
+      console.log(SCA_BOH_MANAGEMENT_APP.glb_var_recordId);
+      console.log(SCA_BOH_MANAGEMENT_APP.glb_var_userdetails.internalemailaddress);
+      console.log(SCA_BOH_MANAGEMENT_APP.glb_var_userdetails.fullname);
+      console.log("SCA Associated Tickets - MASTER Script formOnLoad = Finished");
+    },
+    function error(error) {
+      console.error("Error retrieving user details: " + error.message);
+    }
+  );
+};
+
+
+  //   ██████  ██████  ███    ██ ██████  ██ ████████ ██  ██████  ███    ██  █████  ██          ██     ██  █████  ██████  ███    ██ ██ ███    ██  ██████       ██████ ██   ██ ███████  ██████ ██   ██ 
+  //  ██      ██    ██ ████   ██ ██   ██ ██    ██    ██ ██    ██ ████   ██ ██   ██ ██          ██     ██ ██   ██ ██   ██ ████   ██ ██ ████   ██ ██           ██      ██   ██ ██      ██      ██  ██  
+  //  ██      ██    ██ ██ ██  ██ ██   ██ ██    ██    ██ ██    ██ ██ ██  ██ ███████ ██          ██  █  ██ ███████ ██████  ██ ██  ██ ██ ██ ██  ██ ██   ███     ██      ███████ █████   ██      █████   
+  //  ██      ██    ██ ██  ██ ██ ██   ██ ██    ██    ██ ██    ██ ██  ██ ██ ██   ██ ██          ██ ███ ██ ██   ██ ██   ██ ██  ██ ██ ██ ██  ██ ██ ██    ██     ██      ██   ██ ██      ██      ██  ██  
+  //   ██████  ██████  ██   ████ ██████  ██    ██    ██  ██████  ██   ████ ██   ██ ███████      ███ ███  ██   ██ ██   ██ ██   ████ ██ ██   ████  ██████       ██████ ██   ██ ███████  ██████ ██   ██ 
+
+// ==================================================================================================================================================
+// -------------------------------------------- SCA_Subission - Possible Duplicate Record -----------------------------------------------------------
+// ==================================================================================================================================================
+
+// Action: Check if any duplicate records matching LOC and advise of SCA # if anything found advise
+
+// Status: Confirmed and Tested
+
+  this.warning_duplicaterecord = function (executionContext) {
+    // Get the form context
+    var formContext = executionContext.getFormContext();
+  
+    // Get the value from the 'fds_loc' field on the form
+    var fieldValue = formContext.getAttribute("fds_loc").getValue();
+  
+    if (fieldValue) {
+        // Construct a FetchXML query to check for previous submissions
+        var fetchXml =
+            "<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>" +
+            "<entity name='fds_sca_submissions'>" +
+            "<attribute name='fds_sca_submissionsid' />" +
+            "<attribute name='fds_name' />" +
+            "<filter type='and'>" +
+            "<condition attribute='fds_loc' operator='eq' value='" + fieldValue + "' />" +
+            "<condition attribute='fds_sca_submissionsid' operator='neq' value='" + formContext.data.entity.getId() + "' />" +
+            "</filter>" +
+            "</entity>" +
+            "</fetch>";
+  
+        // Execute the FetchXML query using Web API
+        Xrm.WebApi.retrieveMultipleRecords("fds_sca_submissions", "?fetchXml=" + fetchXml)
+            .then(function success(results) {
+                // Check if there are any previous submissions
+                if (results.entities.length > 0) {
+                    // Get the first duplicate record's 'fds_name' value
+                    var firstDuplicateRecordName = results.entities[0].fds_name;
+  
+                    // Display a warning message under the 'fds_name' field
+                    formContext.getControl("fds_loc").setNotification("Previous Submission Detected Matching Against This LOC ID: " + firstDuplicateRecordName, "warning");
+                } else {
+                    // Clear any previous notifications on the 'fds_name' field
+                    formContext.getControl("fds_loc").clearNotification();
+                }
+            },
+            function (error) {
+                console.log(error.message);
+            });
+    }
+  };
+
+// ==================================================================================================================================================
+// -------------------------------------------- SCA_Requests - New Request - OnFormLoad -------------------------------------------------------------
+// ==================================================================================================================================================
+
+// Action: When new record status (OPEN), hide fields and self populate date and raised by
+
+// Status: Confirmed and Tested
+
+  this.form_requests_newrecord_onload = function (executionContext) {
+    // Get the form context
+    var formContext = executionContext.getFormContext();
+
+    // Get the value of the 'fds_status' field
+    var statusValue = formContext.getAttribute("fds_status").getValue();
+
+    // Check if the 'fds_status' field has the desired value (794610000) "OPEN"
+    if (statusValue === 794610000) {
+        // Set the value of the 'fds_raisedby' field to the current user's internal email address
+        formContext.getAttribute("fds_raisedby").setValue(SCA_BOH_MANAGEMENT_APP.glb_var_userdetails.internalemailaddress);
+
+        // Set the value of the 'createdon' field to the current date and time
+        formContext.getAttribute("createdon").setValue(new Date());
+
+        // Hide the fields when the condition is met
+        formContext.getControl("fds_response").setVisible(false);
+        formContext.getControl("fds_reasonnotvalid").setVisible(false);
+        formContext.getControl("fds_closedate").setVisible(false);
+        formContext.getControl("fds_completedate").setVisible(false);
+        formContext.getControl("fds_actionedby").setVisible(false);
+        formContext.getControl("fds_validresponse").setVisible(false);
+        formContext.getControl("fds_closedby").setVisible(false);
+    } else {
+        // Show the fields when the condition is not met (optional)
+        formContext.getControl("fds_response").setVisible(true);
+        formContext.getControl("fds_reasonnotvalid").setVisible(true);
+        formContext.getControl("fds_closedate").setVisible(true);
+        formContext.getControl("fds_completedate").setVisible(true);
+        formContext.getControl("fds_actionedby").setVisible(true);
+        formContext.getControl("fds_closedby").setVisible(true);
+    }
+}
+
+//████████  █████  ██████      ██    ██ ██ ███████  █████  ██████  ██ ██      ██ ████████ ██    ██     ███████ ██    ██ ███    ██  ██████ ████████ ██  ██████  ███    ██ ███████ 
+//   ██    ██   ██ ██   ██     ██    ██ ██ ██      ██   ██ ██   ██ ██ ██      ██    ██     ██  ██      ██      ██    ██ ████   ██ ██         ██    ██ ██    ██ ████   ██ ██      
+//   ██    ███████ ██████      ██    ██ ██ ███████ ███████ ██████  ██ ██      ██    ██      ████       █████   ██    ██ ██ ██  ██ ██         ██    ██ ██    ██ ██ ██  ██ ███████ 
+//   ██    ██   ██ ██   ██      ██  ██  ██      ██ ██   ██ ██   ██ ██ ██      ██    ██       ██        ██      ██    ██ ██  ██ ██ ██         ██    ██ ██    ██ ██  ██ ██      ██ 
+//   ██    ██   ██ ██████        ████   ██ ███████ ██   ██ ██████  ██ ███████ ██    ██       ██        ██       ██████  ██   ████  ██████    ██    ██  ██████  ██   ████ ███████ 
+
+// ==================================================================================================================================================
+// -------------------------------------------- SCA_AssociatedTickets - Tab Visability - MIR Process ------------------------------------------------
+// ==================================================================================================================================================
+
+// Action: Hides Tabs based on form if fds_manualinterventionrequried = true, to allow user to access to MIR process FORM, otherwise only show general overview 
+
+// Status: Confirmed and Tested
+
+this.associatedtickets_tab_MIR = function(executionContext) {
+    
+  var formContext = executionContext.getFormContext(); 
+
+  var fds_ManualInterventionRequried = formContext.getAttribute("fds_manualinterventionrequried").getValue();
+  console.log("fds_manualinterventionrequried = "+formContext.getAttribute("fds_manualinterventionrequried").getValue());
+
+  if(fds_ManualInterventionRequried === true) {
+      // Hide 'General' and 'Quote' tabs
+      formContext.ui.tabs.get("General").setVisible(false);
+      formContext.ui.tabs.get("Quote").setVisible(false);
+  } else {
+      // Hide 'MIR' tab
+      formContext.ui.tabs.get("MIR").setVisible(false);
+  }
+};
+
+// ==================================================================================================================================================
+// -------------------------------------------- SCA_Submissions - Tab Visability - Escalate tab -----------------------------------------------------
+// ==================================================================================================================================================
+
+// Action: Will hide escalate tab if current user is not the current owner of the ticket.
+
+// Status: Confirmed and Tested
+
+this.tab_Escalate = 
+
+function (executionContext) {
+    // Get the form context
+    var formContext = executionContext.getFormContext();
+
+    // Replace 'emailcolumn' with the actual name of your email column
+    var emailColumn = formContext.getAttribute("fds_currentlyunderreviewby").getValue();
+    
+    // Replace 'useremail' with the user's email
+    var useremail = SCA_BOH_MANAGEMENT_APP.glb_var_userdetails.internalemailaddress;  
+    
+    // Replace 'tabname' with the name of the tab you want to hide/show
+    var tabName = "escalate";
+    
+    // Get the tab control
+    var tab = formContext.ui.tabs.get(tabName);
+
+  // Get the stage value
+  var stage = formContext.getAttribute("fds_stage").getValue();
+
+  // Define the allowed stage values
+  const allowedStages = [
+    794610001, // Desktop Assessment
+    794610021, // IWF Field Assessment (Field Submission)
+    794610002, // IWF Field Assessment
+    794610003, // GM/EGM Review
+    794610011, // SVR OTD Re-validation (Auto Rejected)
+    794610015, // SDS Validation Required
+  ];
+
+  if (emailColumn === useremail && allowedStages.includes(stage)) {
+        // Show the tab if the condition is met
+        tab.setVisible(true);
+    } else {
+        // Hide the tab if the condition is not met
+        tab.setVisible(false);
+    }
+}
+
+// ==================================================================================================================================================
+// -------------------------------------------- SCA_Submissions - Tab Visability - Release for REM --------------------------------------------------
+// ==================================================================================================================================================
+
+// Action: Will hide tab if current user is not the current owner of the ticket.
+
+// Status: Confirmed and Tested, still in-progress ***** ADDITIONAL WORK REQUIRED FOR CONDITIONING, MUST HAVE APPROVED QUOTE BEFORE VISABLE. 
+
+this.tab_releaseforrem = 
+
+function (executionContext) {
+    // Get the form context
+    var formContext = executionContext.getFormContext();
+
+    // Replace 'emailcolumn' with the actual name of your email column
+    var emailColumn = formContext.getAttribute("fds_currentlyunderreviewby").getValue();
+    
+    // Replace 'useremail' with the user's email
+    var useremail = SCA_BOH_MANAGEMENT_APP.glb_var_userdetails.internalemailaddress;  // Set the user's email
+    
+    // Replace 'tabname' with the name of the tab you want to hide/show
+    var tabName = "releaseforrem";
+    
+    // Get the tab control
+    var tab = formContext.ui.tabs.get(tabName);
+  
+    // Get the stage value
+  var stage = formContext.getAttribute("fds_stage").getValue();
+
+  // Define the allowed stage values
+  const allowedStages = [
+    794610001, // Desktop Assessment
+    794610021, // IWF Field Assessment (Field Submission)
+    794610011, // SVR OTD Re-validation (Auto Rejected)
+  ];
+
+  if (emailColumn === useremail && allowedStages.includes(stage)) {
+        // Show the tab if the condition is met
+        tab.setVisible(true);
+    } else {
+        // Hide the tab if the condition is not met
+        tab.setVisible(false);
+    }
+}
+
+// ==================================================================================================================================================
+// -------------------------------------------- SCA_Submissions - Tab Visability - Artefacts --------------------------------------------------------
+// ==================================================================================================================================================
+
+// Action: Will hide tab if current user is not the current owner of the ticket.
+
+// Status: Confirmed and Tested
+
+this.tab_artefacts = 
+
+function (executionContext) {
+    // Get the form context
+    var formContext = executionContext.getFormContext();
+
+    // Replace 'emailcolumn' with the actual name of your email column
+    var emailColumn = formContext.getAttribute("fds_currentlyunderreviewby").getValue();
+    
+    // Replace 'useremail' with the user's email
+    var useremail = SCA_BOH_MANAGEMENT_APP.glb_var_userdetails.internalemailaddress;  // Set the user's email
+    
+    // Replace 'tabname' with the name of the tab you want to hide/show
+    var tabName = "artefacts";
+    
+    // Get the tab control
+    var tab = formContext.ui.tabs.get(tabName);
+
+    if (emailColumn === useremail) {
+        // Show the tab if the condition is met
+        tab.setVisible(true);
+    } else {
+        // Hide the tab if the condition is not met
+        tab.setVisible(false);
+    }
+}
+
+
+// ==================================================================================================================================================
+// -------------------------------------------- SCA_Submissions - Tab Visability - Amend Sors -------------------------------------------------------
+// ==================================================================================================================================================
+
+// Action: Will hide tab if current user is not the current owner of the ticket. and stage doesnt = allowedstages
+
+// Status: Confirmed and Tested, still in-progress ***** Need to confirm at what stages to block any amendments from occuring.
+
+this.tab_AmendSORs = 
+
+function (executionContext) {
+    // Get the form context
+    var formContext = executionContext.getFormContext();
+
+    // Replace 'emailcolumn' with the actual name of your email column
+    var emailColumn = formContext.getAttribute("fds_currentlyunderreviewby").getValue();
+    
+    // Replace 'useremail' with the user's email
+    var useremail = SCA_BOH_MANAGEMENT_APP.glb_var_userdetails.internalemailaddress;  // Set the user's email
+    
+    // Replace 'tabname' with the name of the tab you want to hide/show
+    var tabName = "amendsors";
+    
+    // Get the tab control
+    var tab = formContext.ui.tabs.get(tabName);
+
+  // Get the stage value
+  var stage = formContext.getAttribute("fds_stage").getValue();
+
+  // Define the allowed stage values
+  const allowedStages = [
+    794610001, // Desktop Assessment
+    794610021, // IWF Field Assessment (Field Submission)
+    794610002, // IWF Field Assessment
+    794610003, // GM/EGM Review
+    794610011, // SVR OTD Re-validation (Auto Rejected)
+    794610015, // SDS Validation Required
+    794610014, // Desktop Assessment (HELD Response Received)
+  ];
+
+  if (emailColumn === useremail && allowedStages.includes(stage)) {
+        // Show the tab if the condition is met
+        tab.setVisible(true);
+    } else {
+        // Hide the tab if the condition is not met
+        tab.setVisible(false);
+    }
+}
+
+// ==================================================================================================================================================
+// -------------------------------------------- SCA_Submissions - Tab Visability - Requests ---------------------------------------------------------
+// ==================================================================================================================================================
+
+// Action: Will hiud tab if current user is not the current owner of the ticket.
+
+// Status: Confirmed and Tested, still in-progress ***** ADDITIONAL WORK REQUIRED FOR CONDITIONING, need to hide when status of ticket does not = a resolver group. 
+
+this.tab_Requests = 
+
+function (executionContext) {
+    // Get the form context
+    var formContext = executionContext.getFormContext();
+
+    // Replace 'emailcolumn' with the actual name of your email column
+    var emailColumn = formContext.getAttribute("fds_currentlyunderreviewby").getValue();
+    
+    // Replace 'useremail' with the user's email
+    var useremail = SCA_BOH_MANAGEMENT_APP.glb_var_userdetails.internalemailaddress;  // Set the user's email
+    
+    // Replace 'tabname' with the name of the tab you want to hide/show
+    var tabName = "requests";
+    
+    // Get the tab control
+    var tab = formContext.ui.tabs.get(tabName);
+
+    if (emailColumn === useremail) {
+        // Show the tab if the condition is met
+        tab.setVisible(true);
+    } else {
+        // Hide the tab if the condition is not met
+        tab.setVisible(false);
+    }
+}
+
+//  ██████  ██████  ███    ███ ███    ███ ███████ ███    ██ ██████      ██████  ██    ██ ████████ ████████  ██████  ███    ██     ████████ ██████  ██  ██████   ██████  ███████ ██████  ███████ 
+// ██      ██    ██ ████  ████ ████  ████ ██      ████   ██ ██   ██     ██   ██ ██    ██    ██       ██    ██    ██ ████   ██        ██    ██   ██ ██ ██       ██       ██      ██   ██ ██      
+// ██      ██    ██ ██ ████ ██ ██ ████ ██ █████   ██ ██  ██ ██   ██     ██████  ██    ██    ██       ██    ██    ██ ██ ██  ██        ██    ██████  ██ ██   ███ ██   ███ █████   ██████  ███████ 
+// ██      ██    ██ ██  ██  ██ ██  ██  ██ ██      ██  ██ ██ ██   ██     ██   ██ ██    ██    ██       ██    ██    ██ ██  ██ ██        ██    ██   ██ ██ ██    ██ ██    ██ ██      ██   ██      ██ 
+//  ██████  ██████  ██      ██ ██      ██ ███████ ██   ████ ██████      ██████   ██████     ██       ██     ██████  ██   ████        ██    ██   ██ ██  ██████   ██████  ███████ ██   ██ ███████ 
+
+
+
+// ==================================================================================================================================================
+// -------------------------------------------- SCA_Request - Button - Submit Request ---------------------------------------------------------------
+// ==================================================================================================================================================
+
+// Action:  - Will perform check if all mandatory fields have a value, self-populate fields with date/user details, change sca_submission ticket status to HELD (More information required)
+//          - self-populate fields with date/user details
+//          - change sca_submission ticket status to HELD (More information required)
+//          - add new linked record to sca_comments
+
+// Status: Confirmed and Tested
+
+// Function to handle form submission
+this.form_requests_commendbutton_submitrequest = function (primaryControl) {
+  // Get the form context
+  var formContext = primaryControl;
+
+  // Clear existing notifications
+  formContext.ui.clearFormNotification("requiredFields");
+
+  // Get the values of the required fields
+  var requestType = formContext.getAttribute("fds_requesttype").getValue();
+  var subject = formContext.getAttribute("fds_subject").getValue();
+  var body = formContext.getAttribute("fds_body").getValue();
+  var sca = formContext.getAttribute("fds_sca").getValue();
+
+  // Clear notifications on the fields
+  formContext.getControl("fds_requesttype").clearNotification("requiredFields");
+  formContext.getControl("fds_subject").clearNotification("requiredFields");
+  formContext.getControl("fds_body").clearNotification("requiredFields");
+  formContext.getControl("fds_sca").clearNotification("requiredFields");
+
+  // Check if the required fields have values
+  if (!requestType || !subject || !body || !sca) {
+    // Notify the user and show warnings on the fields
+    formContext.ui.setFormNotification("Please ensure all required fields have a value.", "WARNING", "requiredFields");
+    formContext.getControl("fds_requesttype").setNotification("This field is required.", "requiredFields");
+    formContext.getControl("fds_subject").setNotification("This field is required.", "requiredFields");
+    formContext.getControl("fds_body").setNotification("This field is required.", "requiredFields");
+    formContext.getControl("fds_sca").setNotification("This field is required. Go back to the main form and try again.", "requiredFields");
+
+    // Log additional information for debugging
+    console.log("Validation Error: Please ensure all required fields have a value.");
+    console.log("Required Fields:", { requestType, subject, body, sca });
+
+    return;
+  }
+
+  // Confirm with the user before updating status and saving the record
+  var confirmStrings = {
+    text: "Are you sure you want to submit this request? By submitting this request, the PARENT ticket will be allocated to SDP Resolver Group under More Info Request",
+    title: "Confirmation"
+  };
+  var confirmOptions = {
+    height: 200,
+    width: 450
+  };
+
+  // Open confirmation dialog
+  Xrm.Navigation.openConfirmDialog(confirmStrings, confirmOptions).then(
+    function (success) {
+      if (success.confirmed) {
+        // Update the status field
+        formContext.getAttribute("fds_status").setValue(794610001);
+
+        // Save the record to ensure fds_name is populated
+        formContext.data.save().then(
+          function () {
+            // After save, create a new record in the fds_sca_comments table
+            createSCACommentRecord(primaryControl);
+           
+
+          },
+          function (error) {
+            console.error("Error saving the record:", error);
+          }
+        );
+       
+      }
+    }
+  );
+};
+
+// Function to create a new record in fds_sca_comments table
+function createSCACommentRecord(primaryControl) {
+  // Get the form context
+  var formContext = primaryControl;
+
+  // Log the SCA ID for debugging
+  console.log(formContext.getAttribute("fds_sca").getValue()[0].id.replace("{", "").replace("}", ""));
+
+  // Get values for the new record
+  var newComment = {
+    "fds_commenttype": 794610009,
+    "fds_submitby": SCA_BOH_MANAGEMENT_APP.glb_var_userdetails.internalemailaddress,
+    "fds_subject": "📭📭 Request for more info raised to SDP 📭📭 - ID:" + formContext.getAttribute("fds_name").getValue(),
+    "fds_description": "New request raised for more info by " + formContext.getAttribute("fds_raisedby").getValue(),
+    "fds_SCA@odata.bind": "/fds_sca_submissionses(" + formContext.getAttribute("fds_sca").getValue()[0].id.replace("{", "").replace("}", "") + ")"
+  };
+
+  // Log the target record for debugging
+  console.log("/fds_sca_submissionses(" + formContext.getAttribute("fds_sca").getValue()[0].id.replace("{", "").replace("}", "") + ")");
+
+  // Create the record
+  Xrm.WebApi.createRecord("fds_sca_comments", newComment).then(
+    function () {
+      console.log("New record in fds_sca_comments created successfully.");
+    },
+    function (error) {
+      console.error("Error creating a new record in fds_sca_comments:", error);
+    }
+  );
+
+  // Update the related record linked through the "fds_sca" lookup field
+  var scaLookup = formContext.getAttribute("fds_sca").getValue();
+  if (scaLookup && scaLookup.length > 0) {
+    var scaId = scaLookup[0].id;
+    var scaEntityName = scaLookup[0].entityType;
+
+    // Define the data to update the "fds_stage" field on the related record
+    var scaUpdateData = {
+      "fds_stage": 794610013 // Replace with the value you want to set
+    };
+
+    // Update the related record
+    Xrm.WebApi.updateRecord(scaEntityName, scaId, scaUpdateData).then(
+      function success() {
+        console.log("Related record stage updated successfully.");
+      },
+      function (error) {
+        console.error("Error while updating the related record: " + error.message);
+      }
+    );
+  }
+};
+
+// ==================================================================================================================================================
+// -------------------------------------------- SCA_Request - Button - Cancel Request ---------------------------------------------------------------
+// ==================================================================================================================================================
+
+// Action:  - Cancel in-flight request
+//          - add new fds_comment record regarding
+//          - change status of sca_submission ticket back to resolver group status
+
+// Status: Confirmed and tested ***** ENHENCEMENT required to allocate back to resolver group who raised request
+
+this.form_requests_commendbutton_cancelRequest = function (primaryControl) {
+  // Get the form context
+  var formContext = primaryControl;
+
+  // Open a confirmation dialog
+  var confirmStrings = {
+    text: "Are you sure you want to cancel this request? The PARENT ticket will be re-allocated to Desktop Assessment Resolver Group.",
+    title: "Confirmation"
+  };
+  var confirmOptions = {
+    height: 200,
+    width: 450
+  };
+
+  Xrm.Navigation.openConfirmDialog(confirmStrings, confirmOptions).then(
+    function (success) {
+      if (success.confirmed) {
+        // Update the status field to "Cancelled"
+        formContext.getAttribute("fds_status").setValue(794610004);
+        formContext.getAttribute("fds_closedate").setValue(new Date());
+        formContext.getAttribute("fds_reasonnotvalid").setValue("Request Cancelled by "+SCA_BOH_MANAGEMENT_APP.glb_var_userdetails.internalemailaddress);
+        formContext.getAttribute("fds_closedby").setValue(SCA_BOH_MANAGEMENT_APP.glb_var_userdetails.internalemailaddress);
+        
+        // Save the record
+        formContext.data.save().then(
+          function successCallback() {
+            // Create a new record in the fds_sca_comments table
+            createSCACommentForCancellation(primaryControl);
+                          //refreshrecord
+                          Xrm.Utility.openEntityForm(formContext.data.entity.getEntityName(), formContext.data.entity.getId());
+          },
+          function errorCallback(error) {
+            console.error("Error saving the record:", error);
+          }
+        );
+      }
+    }
+  );
+};
+
+function createSCACommentForCancellation(primaryControl) {
+  // Get the form context
+  var formContext = primaryControl;
+
+  // Get values for the new record
+  var newComment = {
+    "fds_commenttype": 794610009,
+    "fds_submitby": SCA_BOH_MANAGEMENT_APP.glb_var_userdetails.internalemailaddress,
+    "fds_subject": "📭📭 Request has been cancelled 📭📭 - ID:" + formContext.getAttribute("fds_name").getValue(),
+    "fds_description": "Request has been cancelled by " + SCA_BOH_MANAGEMENT_APP.glb_var_userdetails.internalemailaddress,
+    "fds_SCA@odata.bind": "/fds_sca_submissionses(" + formContext.getAttribute("fds_sca").getValue()[0].id.replace("{", "").replace("}", "") + ")"
+  };
+
+  // Create the record
+  Xrm.WebApi.createRecord("fds_sca_comments", newComment).then(
+    function () {
+      console.log("New record in fds_sca_comments created successfully.");
+    },
+    function (error) {
+      console.error("Error creating new record in fds_sca_comments:", error);
+    }
+  );
+
+  // Update the related record linked through the "fds_sca" lookup field
+  var scaLookup = formContext.getAttribute("fds_sca").getValue();
+  if (scaLookup && scaLookup.length > 0) {
+    var scaId = scaLookup[0].id;
+    var scaEntityName = scaLookup[0].entityType;
+
+    // Define the data to update the "fds_stage" field on the related record
+    var scaUpdateData = {
+      "fds_stage": 794610001 // Replace with the value you want to set
+    };
+
+    // Update the related record
+    Xrm.WebApi.updateRecord(scaEntityName, scaId, scaUpdateData).then(
+      function success() {
+        console.log("Related record stage updated successfully.");
+      },
+      function (error) {
+        console.error("Error while updating the related record: " + error.message);
+      }
+    );
+  }
+};
+
+// ==================================================================================================================================================
+// -------------------------------------------- SCA_Request - Button - Close Request ---------------------------------------------------------------
+// ==================================================================================================================================================
+
+// Action:  - Confirm if closure is valid/in-valid and that require fields have info
+//          - Close completed request
+//          - change sca_submission ticket status back to resolver group status
+//          - add new record to sca_comments regarding closure
+
+// Status: 
+
+this.form_requests_commendbutton_closeRequest = function (primaryControl) {
+  // Get the form context
+  var formContext = primaryControl;
+
+  // Clear existing notifications
+  formContext.ui.clearFormNotification("requiredFields");
+
+  // Get the values of the required fields
+  var validResponse = formContext.getAttribute("fds_validresponse").getValue();
+  var reasonNotValid = formContext.getAttribute("fds_reasonnotvalid").getValue();
+
+  console.log("validresponse = "+validResponse+" reasonNotValid = "+reasonNotValid)
+
+  // Check if the conditions for closing are met
+  if ((validResponse === true) || (validResponse === false && reasonNotValid !== null)) {
+     // Confirm with the user before updating status and saving the record
+    var confirmStrings = {
+      text: "Are you sure you want to close this request? By closing this request, the PARENT ticket will be updated accordingly.",
+      title: "Confirmation"
+    };
+    var confirmOptions = {
+      height: 200,
+      width: 450
+    };
+
+    // Open confirmation dialog
+    Xrm.Navigation.openConfirmDialog(confirmStrings, confirmOptions).then(
+      function (success) {
+        if (success.confirmed) {
+          // Update the status field to "Closed"
+          formContext.getAttribute("fds_status").setValue(794610003);
+
+          // Set fds_closedate to the current date
+          formContext.getAttribute("fds_closedate").setValue(new Date());
+
+          // Set fds_closeby to the user's internal email address
+          formContext.getAttribute("fds_closedby").setValue(SCA_BOH_MANAGEMENT_APP.glb_var_userdetails.internalemailaddress);
+
+          // Save the record
+          formContext.data.save().then(
+            function successCallback() {
+              // Create a new record in the fds_sca_comments table
+              createSCACommentForClosure(primaryControl);
+              //refreshrecord
+              Xrm.Utility.openEntityForm(formContext.data.entity.getEntityName(), formContext.data.entity.getId());
+            },
+            function errorCallback(error) {
+              console.error("Error saving the record:", error);
+            }
+          );
+        }
+      }
+    );
+  } else {
+    // Notify the user that the required fields are not filled
+    formContext.ui.setFormNotification("Please ensure either 'Valid Response' is 'Yes' if valid or If not valid 'Reason Not Valid' has a reason.", "WARNING", "requiredFields");
+  }
+};
+
+function createSCACommentForClosure(primaryControl) {
+  // Get the form context
+  var formContext = primaryControl;
+
+  // Get values for the new record
+  var newComment = {
+    "fds_commenttype": 794610009,
+    "fds_submitby": SCA_BOH_MANAGEMENT_APP.glb_var_userdetails.internalemailaddress,
+    "fds_subject": "📭📭 Request has been closed 📭📭 - ID:" + formContext.getAttribute("fds_name").getValue(),
+    "fds_description": "Request has been closed by " + SCA_BOH_MANAGEMENT_APP.glb_var_userdetails.internalemailaddress,
+    "fds_SCA@odata.bind": "/fds_sca_submissionses(" + formContext.getAttribute("fds_sca").getValue()[0].id.replace("{", "").replace("}", "") + ")"
+  };
+
+  // Create the record
+  Xrm.WebApi.createRecord("fds_sca_comments", newComment).then(
+    function () {
+      console.log("New record in fds_sca_comments created successfully.");
+    },
+    function (error) {
+      console.error("Error creating new record in fds_sca_comments:", error);
+    }
+  );
+
+  // Update the related record linked through the "fds_sca" lookup field
+  var scaLookup = formContext.getAttribute("fds_sca").getValue();
+  if (scaLookup && scaLookup.length > 0) {
+    var scaId = scaLookup[0].id;
+    var scaEntityName = scaLookup[0].entityType;
+
+    // Define the data to update the "fds_stage" field on the related record
+    var scaUpdateData = {
+      "fds_stage": 794610001 // Replace with the value you want to set
+    };
+
+    // Update the related record
+    Xrm.WebApi.updateRecord(scaEntityName, scaId, scaUpdateData).then(
+      function success() {
+        console.log("Related record stage updated successfully.");
+      },
+      function (error) {
+        console.error("Error while updating the related record: " + error.message);
+      }
+    );
+  }
+};
+
+// ==================================================================================================================================================
+// -------------------------------------------- SCA_Request - Button - New Record Popup Window ------------------------------------------------------
+// ==================================================================================================================================================
+
+// Action: Open new record for SCA_Request as popup on same form, and link parent sca record to lookup field fds_sca of SCA_Request
+
+// Status: Confirmed and Tested
+
+this.form_requests_commendbutton_openNewFormInPopup = function (primaryControl) {
+  // Get the form context
+  var formContext = primaryControl;
+
+  var parameters = {}; 
+   //Set the Parent record column value for fds_sca  
+      parameters["fds_sca"] = [{ id: formContext.data.entity.getId(), entityType: "fds_sca_submissions", name: formContext.getAttribute("fds_name").getValue() }];
+
+  // Create the PageInput object with the entity logical name and data
+  var pageInput = {
+      pageType: "entityrecord",
+      entityName: "fds_sca_requests",
+      data: parameters
+  };
+
+  // Create the navigationOptions object for the popup
+  var navigationOptions = {
+      target: 2, // 2 represents a popup
+      height: {value: 95, unit:"%"},
+      width: {value: 95, unit:"%"},
+      position: 1 // 1 represents center
+  };
+
+  // Use Xrm.Navigation.navigateTo to open the form with the specified parameters
+  Xrm.Navigation.navigateTo(pageInput, navigationOptions,parameters).then(
+      function success(result) {
+          console.log("Form opened successfully");
+      },
+      function error(error) {
+          console.error("Error opening form: " + error.message);
+      }
+  );
+};
+
+// ==================================================================================================================================================
+// -------------------------------------------- SCA_Comment - Button - New Record Popup Window ------------------------------------------------------
+// ==================================================================================================================================================
+
+// Action: Open new record for SCA_Comment as popup on same form, and link parent sca record to lookup field fds_sca of SCA_Request
+
+// Status: Confirmed and Tested
+
+this.form_comment_commendbutton_openNewFormInPopup = function (primaryControl) {
+  // Get the form context
+  var formContext = primaryControl;
+
+  var parameters = {}; 
+   //Set the Parent record column value for fds_sca  
+      parameters["fds_sca"] = [{ id: formContext.data.entity.getId(), entityType: "fds_sca_submissions", name: formContext.getAttribute("fds_name").getValue() }];
+      parameters["fds_submitby"] = SCA_BOH_MANAGEMENT_APP.glb_var_userdetails.internalemailaddress;
+      parameters["createdon"] = new Date()
+      parameters["fds_commenttype"] = 794610000
+
+  // Create the PageInput object with the entity logical name and data
+  var pageInput = {
+      pageType: "entityrecord",
+      entityName: "fds_sca_comments",
+      data: parameters
+  };
+
+  // Create the navigationOptions object for the popup
+  var navigationOptions = {
+      target: 2, // 2 represents a popup
+      height: {value: 95, unit:"%"},
+      width: {value: 95, unit:"%"},
+      position: 1 // 1 represents center
+  };
+
+  // Use Xrm.Navigation.navigateTo to open the form with the specified parameters
+  Xrm.Navigation.navigateTo(pageInput, navigationOptions,parameters).then(
+      function success(result) {
+          console.log("Form opened successfully");
+      },
+      function error(error) {
+          console.error("Error opening form: " + error.message);
+      }
+  );
+};
+
+// ==================================================================================================================================================
+// -------------------------------------------- SCA_Comment - Button - Submit new comment ---- ------------------------------------------------------
+// ==================================================================================================================================================
+
+// Action: Open new record for SCA_Comment save entry
+
+// Status: Confirmed and Tested
+
+this.form_comment_commendbutton_submit = function (primaryControl) {
+  // Get the form context
+  var formContext = primaryControl;
+
+  // Get the values of fds_subject and fds_description
+  var subject = formContext.getAttribute("fds_subject").getValue();
+  var description = formContext.getAttribute("fds_description").getValue();
+
+  // Check if both fds_subject and fds_description are not null
+  if (subject !== null && description !== null) {
+      // Save the form
+      formContext.data.save().then(
+          function () {
+              // Display a success message using message dialog box
+              Xrm.Navigation.openAlertDialog({ 
+                  text: "Comment has been submitted successfully!, ensure to refresh the page to see new entries.",
+                  confirmButtonLabel: "OK"
+              }).then(
+                  function () {
+                      // Close the form after the user clicks "OK"
+                      formContext.ui.close();
+                  }
+              );
+
+              // Refresh the form (optional)
+              // formContext.data.refresh();
+          },
+          function (error) {
+              // Display an error message if saving fails using message dialog box
+              Xrm.Navigation.openAlertDialog({ text: "Error saving the form: " + error.message });
+          }
+      );
+  } else {
+      // Display a warning if either fds_subject or fds_description is null using message dialog box
+      Xrm.Navigation.openAlertDialog({ text: "Please provide values for both Subject and Description before submitting the comment." });
+  }
+}
+
+
+// ==================================================================================================================================================
+// -------------------------------------------- SCA_Submission - Button - ServiceNow Link -----------------------------------------------------------
+// ==================================================================================================================================================
+
+// Action: Deeplink from record to ServiceNow, will use column value from fds_loc to open ServiceNow and perfrom search query on all tickets with matching LOC
+
+// Status: Confirmed and Active
+
+this.submissionform_button_servicenow = function (primaryControl) {
+  // Get the form context
+  var formContext = primaryControl;
+
+   if (formContext.getAttribute("fds_loc").getValue() != null) {
+      var ID = formContext.getAttribute("fds_loc").getValue();
+      var URL1 = "https://wfmnbnco.service-now.com/nav_to.do?uri=%2Fpm_project_task_list.do%3Fsysparm_query%3Du_case.u_work_typeINService%2520Activation%252CService%2520Restoration%255Elocation.nameSTARTSWITH";
+      var URL2 = "%26sysparm_first_row%3D1%26sysparm_view%3Dservices%26sysparm_choice_query_raw%3D%26sysparm_list_header_search%3Dtrue";
+      };
+      console.log(URL1.concat(ID).concat(URL2));
+  Xrm.Navigation.openUrl(URL1.concat(ID).concat(URL2));
+  }
+
+// ==================================================================================================================================================
+// -------------------------------------------- SCA_Submission - Button - GoogleMaps Link -----------------------------------------------------------
+// ==================================================================================================================================================
+
+// Action: Deeplink from record to GoogleMaps, will use column value from fds_lat and fds_long to open GoogleMaps and perfrom search query to show location
+
+// Status: Confirmed and Active
+
+this.submissionform_button_googlemaps = function (primaryControl) {
+  // Get the form context
+  var formContext = primaryControl;
+
+     if (formContext.getAttribute("fds_wor").getValue() != null) {
+        var LAT = formContext.getAttribute("fds_lat").getValue();
+        var LONG = formContext.getAttribute("fds_long").getValue();
+        var URL1 = "https://www.google.com/maps/place/";
+        };
+        console.log(URL1.concat(LAT).concat(",").concat(LONG));
+    Xrm.Navigation.openUrl(URL1.concat(LAT).concat(",").concat(LONG));
+    }
+
+// ==================================================================================================================================================
+// -------------------------------------------- SCA_Submission - Button - SideCar Link --------------------------------------------------------------
+// ==================================================================================================================================================
+
+// Action: Deeplink from record to GoogleMaps, will use column value from fds_wor to open SideCar and perfrom search query to show network trail
+
+// Status: Confirmed and Active
+
+  this.submissionform_button_sidecarnetworktrail = function (primaryControl) {
+    // Get the form context
+    var formContext = primaryControl;
+
+       if (formContext.getAttribute("fds_wor").getValue() != null) {
+          var ID = formContext.getAttribute("fds_wor").getValue();
+          var URL1 = "https://sidecar.nbnunify.com.au/network-trail?type=ServiceActivation&WO=";
+          };
+          console.log(URL1.concat(ID));
+      Xrm.Navigation.openUrl(URL1.concat(ID));
+      }
+
+// ==================================================================================================================================================
+// -------------------------------------------- SCA_Submission - Button - NBN Portal Link -----------------------------------------------------------
+// ==================================================================================================================================================
+
+// Action: Deeplink from record to NBN Portal, will use column value from fds_loc to open NBN Portal and perfrom search query to show location history
+
+// Status: Confirmed and Active
+
+    this.submissionform_button_nbnportallookup = function (primaryControl) {
+      // Get the form context
+      var formContext = primaryControl;
+      
+      if (formContext.getAttribute("fds_loc").getValue() != null) {
+        var ID = formContext.getAttribute("fds_loc").getValue();
+        var URL1 = "https://nbnportals-internal.nbnco.net.au/hub/app/common/SMC/";
+        };
+        console.log(URL1.concat(ID));
+    Xrm.Navigation.openUrl(URL1.concat(ID));
+    }
+
+// ==================================================================================================================================================
+// -------------------------------------------- SCA_Submission - Button - Claim Ticket --------------------------------------------------------------
+// ==================================================================================================================================================
+
+// Action: Action will allow user to claim ticket, when actioned it will check if user already has open tickets or if someone else is currently active on the ticket, if in-flight will block user from claiming ticket.
+//         - add new record to sca_comment advising ticket claimed by X user for historic purposes.
+//         - add new record to sca-activitylog provide timestamp of when ticket was claimed.
+
+// Status: Confirmed and Active
+
+    this.submissionform_button_claimticket = function (primaryControl) {
+      // Get the form context
+      var formContext = primaryControl;
+  
+      // Define the record to update
+      var recordId = formContext.data.entity.getId().replace("{", "").replace("}", "");
+  
+      // Get user details
+      var userSettings = Xrm.Utility.getGlobalContext().userSettings;
+      var userGUID = userSettings.userId;
+  
+      Xrm.WebApi.retrieveRecord("systemuser", userGUID, "?$select=internalemailaddress,fullname").then(
+          function success(userResult) {
+              var result = userResult;
+              console.log("Retrieved values: Name: " + result.internalemailaddress + ", Full Name: " + result.fullname);
+  
+              // Check for existing in-progress tickets
+              Xrm.WebApi.retrieveMultipleRecords("fds_sca_activitylog", "?$filter=fds_name eq '" + result.internalemailaddress + "' and fds_endtime eq null&$top=1").then(
+                  function success(activityLogResults) {
+                    if (activityLogResults.entities.length > 0) {
+                      // Matching record found, prompt the user with an option to navigate to the in-progress ticket
+                      var inProgressTicketId = activityLogResults.entities[0]._fds_sca_value;
+                      
+                      console.log("inProgressTicketLookup ", activityLogResults.entities[0]);
+                      console.log("inProgressTicketId ", activityLogResults.entities[0]._fds_sca_value);
+          
+                
+                          var notificationStrings = {
+                              text: "You have in-progress tickets. Release them before claiming a new one.",
+                              title: "Warning",
+                              confirmButtonLabel: "Release In-Progress Ticket",
+                              cancelButtonLabel: "Cancel"
+                          };
+                  
+                          Xrm.Navigation.openConfirmDialog(notificationStrings, null).then(
+                              function (success) {
+                                  if (success.confirmed) {
+                                      // Navigate to the in-progress ticket
+                                      Xrm.Utility.openEntityForm("fds_sca_submissions", inProgressTicketId);
+                                  }
+                              },
+                              function (error) {
+                                  console.log(error.message);
+                                  // Handle error conditions for the confirmation dialog
+                              }
+                          );
+                      
+                  } else {
+                          // Retrieve the current record to get the "fds_currentlyunderreviewby" attribute
+                          Xrm.WebApi.retrieveRecord(formContext.data.entity.getEntityName(), recordId, "?$select=fds_currentlyunderreviewby").then(
+                              function success(recordResult) {
+                                  var currentlyUnderReviewBy = recordResult.fds_currentlyunderreviewby;
+  
+                                  if (currentlyUnderReviewBy) {
+                                      // Display an error message
+                                      Xrm.Navigation.openAlertDialog({ text: "Record is already under review." });
+                                      // Add a 2-second delay before opening the updated record's form
+                                      setTimeout(function () {
+                                          Xrm.Utility.openEntityForm(formContext.data.entity.getEntityName(), recordId);
+                                      }, 2000);
+                                  } else {
+                                      // Prompt for confirmation
+                                      var confirmStrings = { text: "Are you sure you want to claim this ticket for review.", title: "Confirm", confirmButtonLabel: "Yes", cancelButtonLabel: "Cancel" };
+                                      Xrm.Navigation.openConfirmDialog(confirmStrings, null).then(
+                                          function (success) {
+                                              if (success.confirmed) {
+                                                  // Define the data to update the record
+                                                  var data = {
+                                                      "fds_currentlyunderreviewby": result.internalemailaddress
+                                                  };
+  
+                                                  // Update the record
+                                                  Xrm.WebApi.updateRecord(formContext.data.entity.getEntityName(), recordId, data).then(
+                                                      function success(updateResult) {
+                                                          console.log("Record updated");
+  
+                                                          // Log the SCA ID for debugging
+                                                          console.log("submit claim record id for comment " + SCA_BOH_MANAGEMENT_APP.glb_var_recordId);
+  
+                                                          // Get values for the new record
+                                                          var newComment = {
+                                                              "fds_commenttype": 794610002,
+                                                              "fds_submitby": result.internalemailaddress,
+                                                              "fds_subject": "🕵️🕵️ Ticket Claimed by user " + result.internalemailaddress + " for review. 🕵️🕵️",
+                                                              "fds_description": "This submission has been claimed by " + result.internalemailaddress + " for review.",
+                                                              "fds_SCA@odata.bind": "/fds_sca_submissionses(" + recordId + ")"
+                                                          };
+  
+                                                          // Log the target record for debugging
+                                                          console.log("/fds_sca_submissionses(" + recordId + ")");
+  
+                                                          // Create the record
+                                                          Xrm.WebApi.createRecord("fds_sca_comments", newComment).then(
+                                                              function () {
+                                                                  console.log("New record in fds_sca_comments created successfully.");
+                                                              },
+                                                              function (error) {
+                                                                  console.error("Error creating a new record in fds_sca_comments:", error);
+                                                              }
+                                                          );
+  
+                                                          // Add a record to fds_sca_activitylog
+                                                          var activityLogData = {
+                                                              "fds_starttime": new Date(),
+                                                              "fds_name": result.internalemailaddress,
+                                                              "fds_SCA@odata.bind": "/fds_sca_submissionses(" + recordId + ")" // Add the lookup to fds_sca
+                                                          };
+  
+                                                          Xrm.WebApi.createRecord("fds_sca_activitylog", activityLogData).then(
+                                                              function success(activityLogResult) {
+                                                                  console.log("Activity log record added");
+                                                              },
+                                                              function (error) {
+                                                                  console.log(error.message);
+                                                                  // Handle error conditions for activity log record creation
+                                                              }
+                                                          );
+  
+                                                          // Add a 3-second delay before opening the updated record's form
+                                                          setTimeout(function () {
+                                                              Xrm.Utility.openEntityForm(formContext.data.entity.getEntityName(), recordId);
+                                                          }, 3000);
+                                                      },
+                                                      function (error) {
+                                                          console.log(error.message);
+                                                          // Handle error conditions for record update
+                                                      }
+                                                  );
+                                              }
+                                          },
+                                          function (error) {
+                                              console.log(error.message);
+                                              // Handle error conditions for the confirmation dialog
+                                          }
+                                      );
+                                  }
+                              },
+                              function (error) {
+                                  console.log(error.message);
+                                  // Handle error conditions for record retrieval
+                              }
+                          );
+                      }
+                  },
+                  function (error) {
+                      console.log(error.message);
+                      // Handle error conditions for activity log record retrieval
+                  }
+              );
+          },
+          function (error) {
+              console.log(error.message);
+              // Handle error conditions for user retrieval
+          }
+      );
+  }
+  
+// ==================================================================================================================================================
+// -------------------------------------------- SCA_Submission - Button - Release Ticket ------------------------------------------------------------
+// ==================================================================================================================================================
+
+// Action: Action will allow user to release ticket, when actioned it will check if current user is the one currently owning the ticket, if not will not allow release. otherwise if current owner
+//         - add new record to sca_comment advising ticket released by X user for historic purposes.
+//         - update record in sca-activitylog to provide timestamp of when ticket was released.
+
+// Status: Confirmed and Active
+
+this.submissionform_button_releaseticket = function (primaryControl) {
+  // Get the form context
+  var formContext = primaryControl;
+
+  // Get the current record's ID
+  var recordId = formContext.data.entity.getId().replace("{", "").replace("}", "");
+
+  // Get user details
+  var userSettings = Xrm.Utility.getGlobalContext().userSettings;
+  var userGUID = userSettings.userId;
+
+  Xrm.WebApi.retrieveRecord("systemuser", userGUID, "?$select=internalemailaddress,fullname").then(
+      function success(userResult) {
+          var result = userResult;
+          console.log("Retrieved values: Name: " + result.internalemailaddress + ", Full Name: " + result.fullname);
+
+          // Retrieve the current record to get the "fds_currentlyunderreviewby" attribute
+          Xrm.WebApi.retrieveRecord(formContext.data.entity.getEntityName(), recordId, "?$select=fds_currentlyunderreviewby").then(
+              function success(recordResult) {
+                  var currentlyUnderReviewBy = recordResult.fds_currentlyunderreviewby;
+
+                  if (currentlyUnderReviewBy === result.internalemailaddress) {
+                      var data = { "fds_currentlyunderreviewby": "" };
+
+                      // Update the record
+                      Xrm.WebApi.updateRecord(formContext.data.entity.getEntityName(), recordId, data).then(
+                          function success(updateResult) {
+                              console.log("Record updated");
+
+
+                              // Log the SCA ID for debugging
+                              console.log("submit claim record id for comment " + SCA_BOH_MANAGEMENT_APP.glb_var_recordId);
+
+                              // Get values for the new record
+                              var newComment = {
+                                  "fds_commenttype": 794610002,
+                                  "fds_submitby": SCA_BOH_MANAGEMENT_APP.glb_var_userdetails.internalemailaddress,
+                                  "fds_subject": "🕵️🕵️ Ticket 👋 released 👋 by user " + SCA_BOH_MANAGEMENT_APP.glb_var_userdetails.internalemailaddress + " 🕵️🕵️",
+                                  "fds_description": "This submission has been released by " + SCA_BOH_MANAGEMENT_APP.glb_var_userdetails.internalemailaddress + " for review.",
+                                  "fds_SCA@odata.bind": "/fds_sca_submissionses(" + SCA_BOH_MANAGEMENT_APP.glb_var_recordId + ")"
+                              };
+
+                              // Log the target record for debugging
+                              console.log("/fds_sca_submissionses(" + SCA_BOH_MANAGEMENT_APP.glb_var_recordId + ")");
+
+                              // Create the record
+                              Xrm.WebApi.createRecord("fds_sca_comments", newComment).then(
+                                  function () {
+                                      console.log("New record in fds_sca_comments created successfully.");
+                                  },
+                                  function (error) {
+                                      console.error("Error creating a new record in fds_sca_comments:", error);
+                                  }
+                              );
+
+                              // Update the fds_sca_activitylog record
+                              updateActivityLog(result, recordId);
+
+                              // Add a 3-second delay before opening the updated record's form
+                              setTimeout(function () {
+                                  Xrm.Utility.openEntityForm(formContext.data.entity.getEntityName(), recordId);
+                              }, 3000);
+                          },
+                          function (error) {
+                              console.log(error.message);
+                              // Handle error conditions for record update
+                          }
+                      );
+                  } else {
+                      // Values do not match, show an error message
+                      Xrm.Navigation.openAlertDialog({ text: "You can't release this ticket as it's currently under review by another user." }).then(function () {
+                          // Force a record refresh after displaying the error message
+                          Xrm.Utility.openEntityForm(formContext.data.entity.getEntityName(), recordId);
+                      });
+                  }
+              },
+              function (error) {
+                  console.log(error.message);
+                  // Handle error conditions for record retrieval
+              }
+          );
+      },
+      function (error) {
+          console.log(error.message);
+          // Handle error conditions for user retrieval
+      }
+  );
+}
+
+// Function to update the fds_sca_activitylog record
+function updateActivityLog(result, recordId) {
+  var fetchXml =
+      '<fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="false">' +
+      '  <entity name="fds_sca_activitylog">' +
+      '    <attribute name="fds_sca_activitylogid" />' +
+      '    <attribute name="fds_starttime" />' +
+      '    <attribute name="fds_endtime" />' +
+      '    <attribute name="fds_sca" />' +
+      '    <attribute name="fds_name" />' +
+      '    <filter type="and">' +
+      '      <condition attribute="fds_starttime" operator="not-null" />' +
+      '      <condition attribute="fds_endtime" operator="null" />' +
+      '      <condition attribute="fds_sca" operator="eq" value="' + recordId + '" />' +
+      '      <condition attribute="fds_name" operator="eq" value="' + result.internalemailaddress + '" />' +
+      '    </filter>' +
+      '    <order attribute="fds_starttime" descending="true" />' +
+      '  </entity>' +
+      '</fetch>';
+
+  console.log(fetchXml);
+
+  Xrm.WebApi.retrieveMultipleRecords("fds_sca_activitylog", "?fetchXml=" + fetchXml).then(
+      function success(results) {
+          if (results.entities.length > 0) {
+              // Update the latest matching record's "fds_endtime" with the current time
+              var activityLogId = results.entities[0].fds_sca_activitylogid;
+              var currentTime = new Date();
+              var activityLogData = {
+                  "fds_endtime": currentTime
+              };
+
+              Xrm.WebApi.updateRecord("fds_sca_activitylog", activityLogId, activityLogData).then(
+                  function success(updateResult) {
+                      console.log("Activity log record updated");
+                  },
+                  function (error) {
+                      console.log(error.message);
+                      // Handle error conditions for activity log record update
+                  }
+              );
+          }
+      },
+      function (error) {
+          console.log(error.message);
+          // Handle error conditions for retrieving activity log records
+      }
+  );
+}
+
+// ==================================================================================================================================================
+// -------------------------------------------- SCA_AssociatedTickets - Button - Submit MIR----------------------------------------------------------
+// ==================================================================================================================================================
+
+// Action: 
+
+// Status: in-progress
+
+this.associatedtickets_button_submitMIR = function (primaryControl) {
+  // Get the form context
+  var formContext = primaryControl;
+  
+  // Get the current record's ID
+  var recordId = formContext.data.entity.getId().replace("{", "").replace("}", "");
+
+  // Retrieve the values of the fields you want to check
+  var worValue = formContext.getAttribute("fds_wor").getValue();
+  var towValue = formContext.getAttribute("fds_tow").getValue();
+  var locValue = formContext.getAttribute("fds_loc").getValue();
+  var AddressValue = formContext.getAttribute("fds_address").getValue();
+  var latValue = formContext.getAttribute("fds_lat").getValue();
+  var longValue = formContext.getAttribute("fds_long").getValue();
+  var technologyValue = formContext.getAttribute("fds_technology").getValue();
+  var sdpValue = formContext.getAttribute("fds_sdp").getValue();
+  var regionTypeValue = formContext.getAttribute("fds_regiontype").getValue();
+
+  var territoryRegionValue = formContext.getAttribute("fds_territoryregion").getValue();
+  var nbnRefValue = formContext.getAttribute("fds_nbnref").getValue();
+  
+  // Check if any of the required fields are empty
+  if (!worValue || !towValue || !locValue || !AddressValue || !latValue || !longValue || !technologyValue || !sdpValue || !regionTypeValue || !territoryRegionValue || !nbnRefValue ) {
+      // Prompt the user to populate all fields
+      Xrm.Navigation.openAlertDialog({
+          text: "Please ensure all fields are populated before proceeding."
+      });
+  } else {
+
+          // Update the "Stage" column to "Created"
+          formContext.getAttribute("fds_mirflowtrigger").setValue(true);
+      
+          // All fields have values, so save the form
+          formContext.data.entity.save();
+                              // Refresh the page
+                              setTimeout(function () {
+                                  Xrm.Utility.openEntityForm(formContext.data.entity.getEntityName(), recordId);
+                              }, 3000);
+  
+              // Show a confirmation message
+              Xrm.Navigation.openAlertDialog({
+                  text: "Thank you, Record has been updated."
+              });
+          ;
+      ;
+  }
+  }
+  
+// ====================================================================================================================================================
+// -------------------------------------------- SCA_AssociatedTickets - Button - Retry Data Validation MIR --------------------------------------------
+// ====================================================================================================================================================
+
+// Action: 
+
+// Status: in-progress
+
+this.associatedtickets_button_retrydatavalidationMIR = function (primaryControl) {
+  // Get the form context
+  var formContext = primaryControl;
+  
+  // Get the current record's ID
+  var recordId = formContext.data.entity.getId().replace("{", "").replace("}", "");
+
+  // Retrieve the values of the fields you want to check
+  var worValue = formContext.getAttribute("fds_wor").getValue();
+  
+  // Check if any of the required fields are empty
+  if (!worValue) {
+      // Prompt the user to populate all fields
+      Xrm.Navigation.openAlertDialog({
+          text: "Please ensure WOR field is populated before proceeding."
+      });
+  } else {
+
+          // Update record
+          formContext.getAttribute("fds_mirflowtrigger").setValue(true);
+          formContext.getAttribute("fds_manualinterventionrequried").setValue(false);
+      
+          // All fields have values, so save the form
+          formContext.data.entity.save();
+                              // Refresh the page
+                              setTimeout(function () {
+                                  Xrm.Utility.openEntityForm(formContext.data.entity.getEntityName(), recordId);
+                              }, 3000);
+  
+              // Show a confirmation message
+              Xrm.Navigation.openAlertDialog({
+                  text: "Thank you, Record has been updated, may take few minutes to perform data validation."
+              });
+          ;
+      ;
+  }
+  }
+
+//// ====== SCA Submission Form - HIDE HEADER  ====== ///// *******************************REBUILD REQUIRED
+
+this.hideheader = function (executionContext) {
+  // Get the form context
+  var formContext = executionContext.getFormContext();
+  console.log("hideheader start");
+  formContext.ui.headerSection.setBodyVisible(false);
+  console.log("hideheader finish");
+}
+
+  this.composeMessage = function (msg) {
+    return MSG_PREFIX + msg;
+  };
+
+
+
+// ==================================================================================================================================================
+// -------------------------------------------- SCA_Submissions - OnTabStateChange - Force Refresh TAB ----------------------------------------------
+// ==================================================================================================================================================
+
+// Action: Force refresh the TAB on change and re-check tab validation
+
+// Status: 
+
+this.submissionform_ontabstatechange_forcerefreshtab = function(executionContext, tabName) {
+  let formContext = executionContext.getFormContext(); 
+  let tabObj = formContext.ui.tabs.get(tabName);
+
+  // Set functions for each tab change
+  tabObj.addTabStateChange(refreshTabData);
+};
+
+function refreshTabData(executionContext) {
+  let formContext = executionContext.getFormContext();
+
+  // Force refresh the tab data
+  SCA_BOH_MANAGEMENT_APP.formOnLoad(executionContext);
+  formContext.data.refresh(true).then(successCallback, errorCallback);
+}
+
+// Callbacks for success/failures
+function successCallback() {
+  console.log("Tab Data Refreshed");
+}
+
+function errorCallback() {
+  console.log("Failed to Refresh Tab Data");
+}
+
+
+
+// ==================================================================================================================================================
+// -------------------------------------------- SCA_Submission - Button - IWF Field Assessment Send to Field ----------------------------------------
+// ==================================================================================================================================================
+
+// Action: 
+
+// Status: 
+
+this.form_comment_commendbutton_iwffieldassessment_sendtofield = function(primaryControl) {
+  // Get the form context
+  var formContext = primaryControl;
+  
+  // Get the current record's ID
+  var recordId = formContext.data.entity.getId();
+
+    Xrm.WebApi.retrieveMultipleRecords("fds_sca_requestses", "$filter=fds_sca eq " + recordId + " and close_date eq null").then(
+        function success(results) {
+
+                // If no matching record, proceed with the confirmation dialog
+                if (results.entities.length === 0 ) {
+                    var confirmation = confirm("Are you sure you want to mark the ticket as Sent To Field Resource?");
+                    if (confirmation) {
+                        updateRecord(recordId);
+                    }
+                } else {
+                    // If there is more than one matching record, inform the user
+                    alert("All requests must be actioned before marking the ticket as Sent To Field Resource.");
+                }
+            
+        },
+        function error(errorResponse) {
+            console.error("Error retrieving records: " + errorResponse.message);
+        }
+    );
+}
+
+function updateRecord(recordId) {
+    // Update the current record
+    var updateData = {
+        "fds_stage": 794610022
+    };
+
+    Xrm.WebApi.updateRecord("fds_sca_submissions", recordId, updateData).then(
+        function success() {
+            console.log("Record updated successfully.");
+            // You can perform additional actions here if needed.
+        },
+        function error(errorResponse) {
+            console.error("Error updating record: " + errorResponse.message);
+        }
+    );
+}
+
+//end
+}).call(SCA_BOH_MANAGEMENT_APP);
+
+
+
